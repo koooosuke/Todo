@@ -1,31 +1,13 @@
-import { supabase } from "@/utils/supabase/supabase"
-import { Dispatch, SetStateAction, ReactElement } from "react"
-import getData from "./getData"
+import { Dispatch, SetStateAction } from "react"
+import { removeTask } from "./actions";
 
 export default function RemoveDialog(props: {
   id: number,
   showModal: Dispatch<SetStateAction<boolean>>,
-  taskList: Dispatch<SetStateAction<Array<ReactElement>>>
 }) {
-  const { showModal, taskList } = props;
+  const { showModal } = props;
 
-  const onSubmit = async (event: any) => {
-    event.preventDefault();
-    showModal(false);
-    try {
-      const { error } = await supabase
-        .from('tasks')
-        .delete()
-        .eq('id', props.id)
-      if (error) {
-        console.log(error);
-      }
-
-      await getData(taskList)
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  const removeTaskWithId = removeTask.bind(null, props.id)
 
   return (
     <div className="overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full h-screen bg-black-rgba pt-28">
@@ -61,7 +43,7 @@ export default function RemoveDialog(props: {
           </div>
           <div className="p-4 md:p-5">
             <div className="flex">
-              <form className="w-1/2" onSubmit={onSubmit}>
+              <form className="w-1/2" action={removeTaskWithId}>
                 <button
                   type="submit"
                   className="w-full text-white bg-blue-500 hover:bg-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"

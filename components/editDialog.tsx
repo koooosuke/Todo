@@ -1,34 +1,26 @@
-import { supabase } from "@/utils/supabase/supabase"
-import { Dispatch, SetStateAction, ReactElement, useState } from "react"
-import getData from "./getData"
+import { Dispatch, SetStateAction, useState } from "react"
+import { useFormState } from "react-dom";
+import { updateTask } from "./actions";
+import React from "react";
 
 export default function EditDialog(props: {
   id: number,
   showModal: Dispatch<SetStateAction<boolean>>,
-  taskList: Dispatch<SetStateAction<Array<ReactElement>>>
 }) {
-  const { showModal, taskList } = props;
+  const { showModal } = props;
   const [text, setText] = useState("");
+  const [state, formAction] = useFormState(updateTask, null);
 
-  const onSubmit = async (event: any) => {
-    event.preventDefault();
-    showModal(false);
-    try {
-      const { data, error } = await supabase
-        .from('tasks')
-        .update({ text: text })
-        .eq('id', props.id)
-        .select()
-      if (error) {
-        console.log(error);
-      }
-
-      await getData(taskList)
-    } catch (error) {
-      console.log(error);
+  React.useEffect(() => {
+    if (!state) {
+      return
     }
-  };
 
+    if (state.result) {
+      setText('');
+      showModal(false)
+    }
+  }, [state])
 
   return (
     <div className="overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full h-screen bg-black-rgba pt-28">
@@ -63,8 +55,9 @@ export default function EditDialog(props: {
             </button>
           </div>
           <div className="p-4 md:p-5">
-            <form className="space-y-4" onSubmit={onSubmit}>
+            <form className="space-y-4" action={formAction}>
               <div>
+                <input name="id" hidden value={props.id} readOnly />
                 <input
                   type="text"
                   name="text"
